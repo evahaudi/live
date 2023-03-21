@@ -7,7 +7,7 @@ export const tokens = (mode) => ({
     ? {
         grey: {
           100: "#e0e0e0",
-          200: "#c2c2c2",
+          200: "#fffff",
           300: "#a3a3a3",
           400: "#858585",
           500: "#666666",
@@ -24,30 +24,52 @@ export const tokens = (mode) => ({
           500: "#141b2d",
           600: "#101624",
           700: "#0c101b",
-          800: "#080b12",
+          800: "#d0di1d5",
           900: "#040509",
+        },
+        black: {
+          100: "#1F2A40",
+          200: "#000000",
+          300: "#d50000",
+          400: "#2e242c",
+          500: "#666666",
+          600: "#605052",
+          700: "#1F2A40",
+          800: "#292929",
+          900: "#7E7374",
+        },
+        white: {
+          100: "#ffffff",
+          200: "#e5e5e5",
+          300: "#cccccc",
+          400: "#b2b2b2",
+          500: "#999999",
+          600: "#7f7f7f",
+          700: "#666666",
+          800: "#292929",
+          900: "#141414",
         },
         greenAccent: {
           100: "#dbf5ee",
           200: "#b7ebde",
           300: "#94e2cd",
           400: "#70d8bd",
-          500: "#4cceac",
+          500: "#f44336",
           600: "#3da58a",
           700: "#2e7c67",
           800: "#1e5245",
           900: "#0f2922",
         },
         redAccent: {
-          100: "#f8dcdb",
-          200: "#f1b9b7",
-          300: "#e99592",
-          400: "#e2726e",
-          500: "#db4f4a",
-          600: "#af3f3b",
-          700: "#832f2c",
-          800: "#58201e",
-          900: "#2c100f",
+          100: "#ffcdd2",
+          200: "#ef9a9a",
+          300: "#e57373",
+          400: "#ffffff",
+          500: "#d50000",
+          600: "#d50000",
+          700: "#ff5252",
+          800: "#710316",
+          900: "#f50057",
         },
         blueAccent: {
           100: "#e1e2fe",
@@ -64,7 +86,7 @@ export const tokens = (mode) => ({
     : {
         grey: {
           100: "#141414",
-          200: "#292929",
+          200: "#fffff",
           300: "#3d3d3d",
           400: "#525252",
           500: "#666666",
@@ -81,7 +103,7 @@ export const tokens = (mode) => ({
           500: "#141b2d",
           600: "#1F2A40",
           700: "#727681",
-          800: "#a1a4ab",
+          800: "#d50000",
           900: "#d0d1d5",
         },
         greenAccent: {
@@ -89,22 +111,46 @@ export const tokens = (mode) => ({
           200: "#1e5245",
           300: "#2e7c67",
           400: "#3da58a",
-          500: "#4cceac",
-          600: "#70d8bd",
+          500: "#f44336",
+          // 600: "#70d8bd",
+          600: "#E80000",
           700: "#94e2cd",
           800: "#b7ebde",
           900: "#dbf5ee",
         },
         redAccent: {
-          100: "#2c100f",
-          200: "#58201e",
-          300: "#832f2c",
-          400: "#af3f3b",
-          500: "#db4f4a",
-          600: "#e2726e",
-          700: "#e99592",
-          800: "#f1b9b7",
-          900: "#f8dcdb",
+          900: "#ffcdd2",
+          800: "#710316",
+          700: "#e57373",
+          600: "#ef5350",
+          500: "#d50000",
+          400: "#d50000",
+          300: "#ff5252",
+          200: "ff1744",
+          100: "#f50057",
+        },
+        black: {
+          100: "#424242",
+          200: "#000000",
+          300: "#000000",
+          // 300: "#000000",
+          400: "#2e242c",
+          500: "#666666",
+          600: "#605052",
+          700: "#413a2f",
+          800: "#292929",
+          900: "#7E7374",
+        },
+        white: {
+          100: "#ffffff",
+          200: "#e5e5e5",
+          300: "#cccccc",
+          400: "#b2b2b2",
+          500: "#999999",
+          600: "#7f7f7f",
+          700: "#666666",
+          800: "#292929",
+          900: "#141414",
         },
         blueAccent: {
           100: "#151632",
@@ -130,7 +176,7 @@ export const themeSettings = (mode) => {
         ? {
             // palette values for dark mode
             primary: {
-              main: colors.primary[500],
+              main: colors.primary[100],
             },
             secondary: {
               main: colors.greenAccent[500],
@@ -164,7 +210,7 @@ export const themeSettings = (mode) => {
     },
     typography: {
       fontFamily: ["Source Sans Pro", "sans-serif"].join(","),
-      fontSize: 12,
+      fontSize: 16,
       h1: {
         fontFamily: ["Source Sans Pro", "sans-serif"].join(","),
         fontSize: 40,
@@ -199,7 +245,7 @@ export const ColorModeContext = createContext({
 });
 
 export const useMode = () => {
-  const [mode, setMode] = useState("dark");
+  const [mode, setMode] = useState("light");
 
   const colorMode = useMemo(
     () => ({
