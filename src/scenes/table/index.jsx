@@ -1,7 +1,8 @@
-import { Box,Typography,useTheme ,IconButton,Button} from "@mui/material";
+import { Box,Typography,useTheme ,IconButton,Button, Menu, MenuItem} from "@mui/material";
 import Swal from 'sweetalert2';
 import { useState ,useEffect} from 'react';
 import SearchIcon from "@mui/icons-material/Search";
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import InputBase from "@mui/material/InputBase";
 import { DataGrid, GridToolbar  } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
@@ -12,9 +13,53 @@ const Employee = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [data, setData] = useState([]);
   
+  
   const [selectionModel, setSelectionModel] = useState([]);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+
+
+  const handleClick = (event, id) => {
+    setAnchorEl(event.currentTarget);
+    setSelectionModel(id);
+  };
+  
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+  
+  const handleOpenSwal = (id) => {
+    setAnchorEl(null);
+    Swal({
+      content: (
+        <iframe
+          src="http://127.0.0.1:5500/index.html"
+          height="700"
+          width="1250"
+          title="popot"
+          style={{ border: "none", borderRadius: "5px" }} // add custom styles
+        />
+      ),
+      buttons: {
+        close: {
+          text: "Close",
+          value: null,
+          visible: true,
+          className: "btn btn-primary",
+          closeModal: true,
+        },
+      },
+    });
+  };
+ 
+  
+  
+  
+  
+  
+  
   
   const getFilteredRows = () => {
     return customer.filter(
@@ -197,6 +242,7 @@ const Employee = () => {
         console.log(data)
   };
   
+  
 
   const columns = [
     {
@@ -208,18 +254,18 @@ const Employee = () => {
     
     { field: "pinNo", headerName: "PIN No.", headerAlign: "left", fontSize: 40, width: 130},
     { field: "taxpayerName", headerName: "TAXPAYER NAME", headerAlign: "left", fontSize: 40, width: 200},
-    { field: "suppliersName", headerName: "SUPPLIER NAME", headerAlign: "left", fontSize: 16, width: 250},
-    { field: "purchTotal",headerName: "TOTAL PURCHASE",type:"number", headerAlign: "left", fontSize: 16, width: 150,},
+    { field: "suppliersName", headerName: "SUPPLIER NAME", headerAlign: "left", fontSize: 16, width: 230},
+    { field: "purchTotal",headerName: "TOTAL PURCHASE",type:"number", headerAlign: "left", fontSize: 16, width: 140},
     { field: "trpFromDt",headerName: "trpFromDt", headerAlign: "left",fontSize: 16, width: 100},
     { field: "trpToDt",headerName: "trpToDt", headerAlign: "left",fontSize: 16, width: 100},
     { field: "invoiceNo",headerName: "INVOICE NUMBER", headerAlign: "left", fontSize: 16, width: 150},
-    { field: "invoiceDate",headerName: "INVOICE DATE", headerAlign: "left", fontSize: 16, width: 150},
-    { field: "lookupCode",headerName: "LOOKUP CODE", headerAlign: "left", fontSize: 16, width: 120},
-    // 
+    { field: "invoiceDate",headerName: "INVOICE DATE", headerAlign: "left", fontSize: 16, width: 120},
+    // { field: "lookupCode",headerName: "LOOKUP CODE", headerAlign: "left", fontSize: 16, width: 120},
+    
     {
       field: 'action',
       headerName: 'ACTION',
-      width: 150,
+      width: 130,
       renderCell: (params) => (
         <Button
           variant="outlined"
@@ -241,6 +287,41 @@ const Employee = () => {
       )
         
      },
+     {
+      field: 'graph',
+      headerName: 'graph',
+      width: 50,
+      renderCell: (params) => (
+        <div>
+          <IconButton
+            aria-label="more"
+            aria-controls="long-menu"
+            aria-haspopup="true"
+            onClick={(e) => handleClick(e, params.row.id)}
+          >
+            <MoreVertIcon />
+          </IconButton>
+          <Menu
+            id="long-menu"
+            anchorEl={anchorEl}
+            keepMounted
+            open={open}
+            onClose={handleClose}
+          >
+        <MenuItem onClick={() => handleOpenSwal(params.row.id)}><iframe
+          src="http://127.0.0.1:5500/index.html"
+          height="700"
+          width="1250"
+          title="popot"
+          style={{ border: "none", borderRadius: "5px" }} // add custom styles
+        />
+        </MenuItem>
+          </Menu>
+        </div>
+      ),
+    }
+    
+    
     
   ];
 
@@ -374,7 +455,7 @@ const Employee = () => {
   rowsPerPageOptions={[20]}
 />
 </Box>  
-    <Box textAlign="center" >
+    <Box textAlign="center"  >
         <Typography variant="h5" color={colors.grey[100]}>
           @2023KRA Copyrights.
         </Typography>   

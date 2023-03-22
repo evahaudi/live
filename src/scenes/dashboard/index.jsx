@@ -24,7 +24,7 @@ const Dashboard = () => {
       <Pop cypher={cypher} />
       </Box>
       {/* FOOTER */}
-      <Box textAlign="center" py={2}   mt="550px">
+      <Box textAlign="center" py={2}   >
       <Typography variant="h5" color={colors.grey[100]}>
       @2023KRA Copyrights.All rights reserved.
       </Typography>

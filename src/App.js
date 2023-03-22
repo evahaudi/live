@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import Topbar from "./scenes/global/Topbar";
 import Sidebar from "./scenes/global/Sidebar";
-import Dashboard from "./scenes/dashboard";
+// import Dashboard from "./scenes/dashboard";
 
 import Contacts from "./scenes/contacts";
 import Employee from "./scenes/table"; 
@@ -25,8 +25,21 @@ function App() {
           <main className="content">
             <Topbar setIsSidebar={setIsSidebar} />
             <Routes>
-              <Route path="/" element={<Dashboard />} />
-           
+              {/* <Route path="/" element={<iframe src='http://127.0.0.1:5500/index.html' height="500" width="1250" title='popot' padding ="40px" />} />  */}
+              <Route
+  path="/"
+  element={
+    <div style={{ padding: "40px", marginTop:"0px"}}>
+      <iframe
+        src="http://127.0.0.1:5500/index.html"
+        height="700"
+        width="1250"
+        title="popot"
+        style={{ border: "none", borderRadius: "5px" }} // add custom styles
+      />
+    </div>
+  }
+/>
               <Route path="/contacts" element={<Contacts />} />
               <Route path="/table" element={<Employee />} />
           
