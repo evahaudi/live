@@ -1,4 +1,5 @@
-# React Admin Dashboard
+# creating a react app
 
-Completed React Admin Dashboard Repo
+React Admin dashboard project
+
 
