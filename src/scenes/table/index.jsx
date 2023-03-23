@@ -34,31 +34,35 @@ const Employee = () => {
     setAnchorEl(null);
     Swal({
       content: (
-        <iframe
-          src="http://127.0.0.1:5500/index.html"
-          height="700"
-          width="1250"
-          title="popot"
-          style={{ border: "none", borderRadius: "5px" }} // add custom styles
-        />
+        <div>
+          <iframe
+            src="http://127.0.0.1:5500/index.html"
+            height="00"
+            width="1000"
+            title="popoto"
+            style={{ border: "1px", borderRadius: "20px" }} // add custom styles
+          />
+        </div>
       ),
-      buttons: {
-        close: {
-          text: "Close",
-          value: null,
-          visible: true,
-          className: "btn btn-primary",
-          closeModal: true,
-        },
-      },
+      showCloseButton: true,
+      showConfirmButton: false,
+      
     });
   };
+  
+  
  
-  
-  
-  
-  
-  
+  const CustomMenuItem = ({ onClick }) => (
+    <div onClick={onClick}>
+      <iframe
+        src="http://127.0.0.1:5500/index.html"
+        height="700"
+        width="1250"
+        title="popoto"
+        style={{ border: "none", borderRadius: "5px" }} // add custom styles
+      />
+    </div>
+  );
   
   
   const getFilteredRows = () => {
@@ -308,14 +312,9 @@ const Employee = () => {
             open={open}
             onClose={handleClose}
           >
-        <MenuItem onClick={() => handleOpenSwal(params.row.id)}><iframe
-          src="http://127.0.0.1:5500/index.html"
-          height="700"
-          width="1250"
-          title="popot"
-          style={{ border: "none", borderRadius: "5px" }} // add custom styles
-        />
-        </MenuItem>
+       <MenuItem onClick={() => handleOpenSwal(params.row.id)}>
+       <CustomMenuItem onClick={() => handleOpenSwal(params.row.id)} />
+       </MenuItem>
           </Menu>
         </div>
       ),
