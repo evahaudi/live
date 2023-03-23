@@ -258,14 +258,14 @@ const Employee = () => {
     
     { field: "pinNo", headerName: "PIN No.", headerAlign: "left", fontSize: 40, width: 130},
     { field: "taxpayerName", headerName: "TAXPAYER NAME", headerAlign: "left", fontSize: 40, width: 200},
-    { field: "suppliersName", headerName: "SUPPLIER NAME", headerAlign: "left", fontSize: 16, width: 230},
+    { field: "suppliersName", headerName: "SUPPLIER NAME", headerAlign: "left", fontSize: 16, width: 280},
     { field: "purchTotal",headerName: "TOTAL PURCHASE",type:"number", headerAlign: "left", fontSize: 16, width: 140},
     { field: "trpFromDt",headerName: "trpFromDt", headerAlign: "left",fontSize: 16, width: 100},
     { field: "trpToDt",headerName: "trpToDt", headerAlign: "left",fontSize: 16, width: 100},
     { field: "invoiceNo",headerName: "INVOICE NUMBER", headerAlign: "left", fontSize: 16, width: 150},
     { field: "invoiceDate",headerName: "INVOICE DATE", headerAlign: "left", fontSize: 16, width: 120},
-    // { field: "lookupCode",headerName: "LOOKUP CODE", headerAlign: "left", fontSize: 16, width: 120},
-    
+    { field: "lookupCode",headerName: "LOOKUP CODE", headerAlign: "left", fontSize: 16, width: 120},
+    {field:"typeOfPurchases",headerName:"PURCHASE",headerAlign:"left",fontSize:16,width:120},
     {
       field: 'action',
       headerName: 'ACTION',
@@ -292,9 +292,9 @@ const Employee = () => {
         
      },
      {
-      field: 'graph',
-      headerName: 'graph',
-      width: 50,
+      field: 'GRAPH',
+      headerName: 'GRAPH',
+      width: 60,
       renderCell: (params) => (
         <div>
           <IconButton
