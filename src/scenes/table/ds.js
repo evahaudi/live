@@ -290,11 +290,12 @@ const Employee = () => {
       </Box>
     ),
   }}
-  checkboxSelection
-  selectionModel={selectionModel} 
-  onSelectionModelChange={(newSelectionModel) => {
-    setSelectionModel(newSelectionModel);
-  }} 
+  keepNonExistentRowsSelected
+  checkboxSelection={true}
+  // selectionModel={selectionModel} 
+  // onSelectionModelChange={(newSelectionModel) => {
+  //   setSelectionModel(newSelectionModel);
+  // }} 
   
   pageSize={20}
   rowsPerPageOptions={[20]}

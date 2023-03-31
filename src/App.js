@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Iframe from 'react-iframe';
 import { Routes, Route } from "react-router-dom";
 import Topbar from "./scenes/global/Topbar";
 import Sidebar from "./scenes/global/Sidebar";
@@ -30,11 +31,11 @@ function App() {
   path="/"
   element={
     <div style={{ padding: "40px", marginTop:"0px"}}>
-      <iframe
+      <Iframe
         src="http://127.0.0.1:5500/index.html"
         height="700"
         width="1250"
-        title="popot"
+        title="popoto"
         style={{ border: "none", borderRadius: "5px" }} // add custom styles
       />
     </div>

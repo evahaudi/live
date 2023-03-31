@@ -5,6 +5,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import InputBase from "@mui/material/InputBase";
 import { DataGrid, GridToolbar  } from "@mui/x-data-grid";
+import { v4 as uuidv4 } from 'uuid';
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
 
@@ -49,7 +50,7 @@ const Employee = () => {
       
     });
   };
-  
+
   
  
   const CustomMenuItem = ({ onClick }) => (
@@ -65,13 +66,13 @@ const Employee = () => {
   );
   
   
-  const getFilteredRows = () => {
-    return customer.filter(
-      row =>
-        row.pinNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        row.taxpayerName.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  };
+  // const getFilteredRows = () => {
+  //   return customer.filter(
+  //     row =>
+  //       row.pinNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //       row.taxpayerName.toLowerCase().includes(searchQuery.toLowerCase())
+  //   );
+  // };
   
 
   const handleInputChange = (event) => {
@@ -100,7 +101,7 @@ const Employee = () => {
       return;
     }
   
-    let url = 'http://10.153.1.85:8081/api/directorDetails';
+    let url = 'http://10.153.1.85:8000/fraud_app/api/v1/Directors/';
     if (selectedPins.length === 1) {
       url += `?pinNo=${selectedPins[0]}`;
     } else {
@@ -177,7 +178,7 @@ const Employee = () => {
 
   const handleView = (pinNo) => {
    
-    let url = `http://10.153.1.85:8081/api/directorDetails?pinNo=${pinNo}`;
+    let url = `http://10.153.1.85:8000/fraud_app/api/v1/Directors/`;
    
   
     fetch(url)
@@ -208,10 +209,10 @@ const Employee = () => {
         <tbody>
           ${data.map(item => `
             <tr style="background-color: ${item.isOdd ? '#f2f2f2' : 'transparent'};">
-              <td style="border: 1px solid #dddddd; text-align: left; padding: 8px;">${item.pinNo}</td>
-              <td style="border: 1px solid #dddddd; text-align: left; padding: 8px;">${item.taxPayerName}</td>
-              <td style="border: 1px solid #dddddd; text-align: left; padding: 8px;">${item.associatedEntityPin}</td>
-              <td style="border: 1px solid #dddddd; text-align: left; padding: 8px;">${item.associatedEntityType}</td>
+              <td style="border: 1px solid #dddddd; text-align: left; padding: 8px;">${item.pin_no}</td>
+              <td style="border: 1px solid #dddddd; text-align: left; padding: 8px;">${item.tax_payer_name}</td>
+              <td style="border: 1px solid #dddddd; text-align: left; padding: 8px;">${item.associated_entity_pin}</td>
+              <td style="border: 1px solid #dddddd; text-align: left; padding: 8px;">${item.associated_entity_type}</td>
             </tr>
           `).join('')}
         </tbody>
@@ -256,16 +257,17 @@ const Employee = () => {
       hide:true,
     },
     
-    { field: "pinNo", headerName: "PIN No.", headerAlign: "left", fontSize: 40, width: 130},
-    { field: "taxpayerName", headerName: "TAXPAYER NAME", headerAlign: "left", fontSize: 40, width: 200},
-    { field: "suppliersName", headerName: "SUPPLIER NAME", headerAlign: "left", fontSize: 16, width: 280},
-    { field: "purchTotal",headerName: "TOTAL PURCHASE",type:"number", headerAlign: "left", fontSize: 16, width: 140},
-    { field: "trpFromDt",headerName: "trpFromDt", headerAlign: "left",fontSize: 16, width: 100},
-    { field: "trpToDt",headerName: "trpToDt", headerAlign: "left",fontSize: 16, width: 100},
-    { field: "invoiceNo",headerName: "INVOICE NUMBER", headerAlign: "left", fontSize: 16, width: 150},
-    { field: "invoiceDate",headerName: "INVOICE DATE", headerAlign: "left", fontSize: 16, width: 120},
-    { field: "lookupCode",headerName: "LOOKUP CODE", headerAlign: "left", fontSize: 16, width: 120},
-    {field:"typeOfPurchases",headerName:"PURCHASE",headerAlign:"left",fontSize:16,width:120},
+    { field: "pin_no", headerName: "PIN No.", headerAlign: "left", fontSize: 40, width: 120},
+    { field: "suppliers_name", headerName: "SUPPLIER NAME", headerAlign: "left", fontSize: 40, width: 240},
+    { field: "trp_from_dt",headerName: "trpFromDt", headerAlign: "left",fontSize: 16, width: 100},
+    { field: "trp_to_dt",headerName: "trpToDt", headerAlign: "left",fontSize: 16, width: 100},
+    { field: "invoice_no",headerName: "INVOICE NUMBER", headerAlign: "left", fontSize: 16, width: 150},
+    { field: "invoice_date",headerName: "INVOICE DATE", headerAlign: "left", fontSize: 16, width: 120},
+    { field: "lookup_code",headerName: "LOOKUP CODE", headerAlign: "left", fontSize: 16, width: 120},
+    { field: "station_name",headerName: "STATION NAME", headerAlign: "left", fontSize: 16, width: 120},
+    { field: "cust_entry_no_prn",headerName: "ENTRY NUMBER", headerAlign: "left", fontSize: 16, width: 140},
+    { field: "amnt_before_tax",headerName: "AMNT BEFORE TAX", headerAlign: "left", fontSize: 16, width: 160},
+    {field:"type_of_purchases",headerName:"PURCHASE",headerAlign:"left",fontSize:16,width:100},
     {
       field: 'action',
       headerName: 'ACTION',
@@ -324,13 +326,40 @@ const Employee = () => {
     
   ];
 
+
+
+  
   useEffect(() => {
-    fetch("http://10.153.1.85:8081/api/falseImports")
+    fetch('http://10.153.1.85:8000/fraud_app/api/v1/FalseImports/')
       .then(response => response.json())
-      .then(json => setCustomer(json.content))
+      .then(data => {
+        const results = data.results.map(item => ({
+          id: uuidv4(),
+          pin_no: item.pin_no,
+          suppliers_name:item.suppliers_name,
+          trp_from_dt: item.trp_from_dt,
+          trp_to_dt: item.trp_to_dt,
+          invoice_no:item.invoice_no,
+          invoice_date:item.invoice_date,
+          lookup_code:item.lookup_code,
+          station_name: item.station_name,
+          cust_entry_no_prn:item.cust_entry_no_prn,
+          amnt_before_tax:item.amnt_before_tax,
+          type_of_purchases:item.type_of_purchases
+          
+        }));
+        setCustomer(results);
+      })
       .catch(error => console.error(error));
   }, []);
-  console.log(customer)
+  
+  console.log(customer);
+  
+
+
+
+
+
 
   return (
     <Box m="20px">
@@ -379,8 +408,10 @@ const Employee = () => {
       }}
     > 
  <DataGrid
-  rows={getFilteredRows()}
+  rows={customer}
   columns={columns}
+  // getRowId={(row) => row.pin_no}
+  rowKey="id"
   components={{
     Toolbar: () => (
       <Box
@@ -444,6 +475,7 @@ const Employee = () => {
       </Box>
     ),
   }}
+  
   checkboxSelection
   selectionModel={selectionModel} 
   onSelectionModelChange={(newSelectionModel) => {
