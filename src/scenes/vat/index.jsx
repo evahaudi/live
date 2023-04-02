@@ -54,7 +54,7 @@ const Graph = (props) => {
     />
     <Box
       m="40px 0 0 0"
-      height="72vh"
+      height="36vh"
       width="1200px"
       
       sx={{
@@ -110,7 +110,7 @@ const Graph = (props) => {
 </Box>  
 <Box
       m="40px 0 0 0"
-      height="72vh"
+      height="36vh"
       width="1200px"
       
       sx={{
