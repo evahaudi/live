@@ -9,8 +9,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
 
-const Employee = () => {
-  const [customer, setCustomer] = useState([]);
+const Customer = () => {
+  const [tax, setTax] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [data, setData] = useState([]);
   
@@ -84,10 +84,10 @@ const Employee = () => {
     
     let selectedPins = [];
     if (selectionModel.length === 1) {
-      const selectedRow = customer.find((row) => row.id === selectionModel[0]);
+      const selectedRow = tax.find((row) => row.id === selectionModel[0]);
       selectedPins.push(selectedRow?.pinNo);
     } else if (selectionModel.length > 1) {
-      selectedPins = selectionModel.map((id) => customer.find((row) => row.id === id)?.pinNo);
+      selectedPins = selectionModel.map((id) => tax.find((row) => row.id === id)?.pinNo);
       console.log(selectedPins)
     }
     
@@ -258,16 +258,10 @@ const Employee = () => {
     },
     
     { field: "pin_no", headerName: "PIN No.", headerAlign: "left", fontSize: 40, width: 120},
-    { field: "suppliers_name", headerName: "SUPPLIER NAME", headerAlign: "left", fontSize: 40, width: 240},
-    { field: "trp_from_dt",headerName: "trpFromDt", headerAlign: "left",fontSize: 16, width: 100},
-    { field: "trp_to_dt",headerName: "trpToDt", headerAlign: "left",fontSize: 16, width: 100},
-    { field: "invoice_no",headerName: "INVOICE NUMBER", headerAlign: "left", fontSize: 16, width: 150},
-    { field: "invoice_date",headerName: "INVOICE DATE", headerAlign: "left", fontSize: 16, width: 120},
-    { field: "lookup_code",headerName: "LOOKUP CODE", headerAlign: "left", fontSize: 16, width: 120},
-    { field: "station_name",headerName: "STATION NAME", headerAlign: "left", fontSize: 16, width: 120},
-    { field: "cust_entry_no_prn",headerName: "ENTRY NUMBER", headerAlign: "left", fontSize: 16, width: 140},
-    { field: "amnt_before_tax",headerName: "AMNT BEFORE TAX", headerAlign: "left", fontSize: 16, width: 160},
-    {field:"type_of_purchases",headerName:"PURCHASE",headerAlign:"left",fontSize:16,width:100},
+    { field: "tax_payer_name", headerName: "TAXPAYER NAME", headerAlign: "left", fontSize: 40, width: 240},
+    { field: "associated_entity_pin", headerName: "ASSOCIATED PIN", headerAlign: "left", fontSize: 40, width: 240},
+    { field: "associated_entity_type", headerName: "ASSOCIATED TYPE", headerAlign: "left", fontSize: 40, width: 240},
+
     {
       field: 'action',
       headerName: 'ACTION',
@@ -330,30 +324,22 @@ const Employee = () => {
 
   
   useEffect(() => {
-    fetch('http://10.153.1.85:8000/fraud_app/api/v1/FalseImports/')
+    fetch('http://10.153.1.85:8000/fraud_app/api/v1/Directors/')
       .then(response => response.json())
       .then(data => {
         const results = data.results.map(item => ({
           id: uuidv4(),
           pin_no: item.pin_no,
-          suppliers_name:item.suppliers_name,
-          trp_from_dt: item.trp_from_dt,
-          trp_to_dt: item.trp_to_dt,
-          invoice_no:item.invoice_no,
-          invoice_date:item.invoice_date,
-          lookup_code:item.lookup_code,
-          station_name: item.station_name,
-          cust_entry_no_prn:item.cust_entry_no_prn,
-          amnt_before_tax:item.amnt_before_tax,
-          type_of_purchases:item.type_of_purchases
-          
-        }));
-        setCustomer(results);
+          tax_payer_name:item.tax_payer_name,
+          associated_entity_pin:item.associated_entity_pin,
+          associated_entity_type:item.associated_entity_type
+          }));
+        setTax(results);
       })
       .catch(error => console.error(error));
   }, []);
   
-  console.log(customer);
+  console.log(tax);
   
 
 
@@ -370,6 +356,7 @@ const Employee = () => {
     <Box
       m="40px 0 0 0"
       height="72vh"
+      width="1200px"
       sx={{
         "& .MuiDataGrid-root": {
           border: "none",
@@ -408,7 +395,7 @@ const Employee = () => {
       }}
     > 
  <DataGrid
-  rows={customer}
+  rows={tax}
   columns={columns}
   rowKey="id"
   components={{
@@ -495,7 +482,7 @@ const Employee = () => {
   );
 };
 
-export default Employee;
+export default Customer;
 
 
 

@@ -126,6 +126,24 @@ const Sidebar = () => {
               selected={selected}
               setSelected={setSelected}
             />
+
+
+
+            <Item
+              title="Vat data"
+              to="/Vat"
+              icon={<PersonOutlinedIcon />}
+              selected={selected}
+              setSelected={setSelected}
+            />
+
+            <Item
+              title="Test data"
+              to="/Tax"
+              icon={<PersonOutlinedIcon />}
+              selected={selected}
+              setSelected={setSelected}
+            />
             
             
 

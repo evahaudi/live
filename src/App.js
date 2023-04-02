@@ -4,6 +4,8 @@ import { Routes, Route } from "react-router-dom";
 import Topbar from "./scenes/global/Topbar";
 import Sidebar from "./scenes/global/Sidebar";
 // import Dashboard from "./scenes/dashboard";
+import Customer from "./scenes/tax";
+import Graph from "./scenes/vat";
 
 import Contacts from "./scenes/contacts";
 import Employee from "./scenes/table"; 
@@ -43,6 +45,9 @@ function App() {
 />
               <Route path="/contacts" element={<Contacts />} />
               <Route path="/table" element={<Employee />} />
+              <Route path="/vat" element={<Customer />} />
+              <Route path="/tax" element={<Graph />} />
+              
           
          
             </Routes>
