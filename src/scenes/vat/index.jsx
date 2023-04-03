@@ -4,14 +4,29 @@ import { DataGrid, GridToolbar  } from "@mui/x-data-grid";
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
 
-const Graph = (props) => {
+const Graph = () => {
   const [owners, setOwners] = useState([]);
   const [falseImports, setFalseImports] = useState([]);
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
+  // useEffect(() => {
+  //   fetch(`http://10.153.1.85:8000/fraud_app/api/v1/owner_and_false_imports/${props.pinNo}/`)
+  //     .then(response => response.json())
+  //     .then(data => {
+  //       const parsedOwners = JSON.parse(data.owners);
+  //       setOwners(parsedOwners);
+  //       const parsedFalseImports = JSON.parse(data.false_imports);
+  //       setFalseImports(parsedFalseImports);
+  //     })
+  //     .catch(error => console.error(error));
+  // }, [props.pinNo]);
+  // console.log(owners);
+  // console.log(falseImports);
+
+
   useEffect(() => {
-    fetch(`http://10.153.1.85:8000/fraud_app/api/v1/owner_and_false_imports/${props.pinNo}/`)
+    fetch(`http://10.153.1.85:8000/fraud_app/api/v1/owner_and_false_imports/P051193029R/`)
       .then(response => response.json())
       .then(data => {
         const parsedOwners = JSON.parse(data.owners);
@@ -20,23 +35,23 @@ const Graph = (props) => {
         setFalseImports(parsedFalseImports);
       })
       .catch(error => console.error(error));
-  }, [props.pinNo]);
+  }, []);
   console.log(owners);
   console.log(falseImports);
 
   const ownersColumns = [
-    { field: "tax_payer_name", headerName: "Name", width: 200 },
+    { field: "tax_payer_name", headerName: "  TAXPAYER NAME", width: 200 },
     { field: "pin_no", headerName: "PIN No", width: 150 },
-    { field: "associated_entity_type", headerName: "Associated Entity Type", width: 250 },
-    { field: "associated_entity_pin", headerName: "Associated Entity PIN", width: 200 }
+    { field: "associated_entity_type", headerName: "ASSOCIATED ENTITY TYPE", width: 250 },
+    { field: "associated_entity_pin", headerName: "ASSOCIATED ENTITY PIN", width: 200 }
   ];
 
   const falseImportsColumns = [
-    { field: "cust_entry_no_prn", headerName: "Cust Entry No PRN", width: 250 },
-    { field: "invoice_no", headerName: "Invoice No", width: 150 },
-    { field: "lookup_code", headerName: "Lookup Code", width: 200 },
-    { field: "suppliers_name", headerName: "Suppliers Name", width: 250 },
-    { field: "invoice_date", headerName: "Invoice Date", width: 150 }
+    { field: "cust_entry_no_prn", headerName: "CUST ENTRY NO PRN", width: 250 },
+    { field: "invoice_no", headerName: "INVOICE NO", width: 150 },
+    { field: "lookup_code", headerName: "LOOKUP CODE", width: 200 },
+    { field: "suppliers_name", headerName: "SUPPLIERS NAME", width: 250 },
+    { field: "invoice_date", headerName: "INVOICE DATE", width: 150 }
   ];
 
   return (
@@ -111,7 +126,7 @@ const Graph = (props) => {
 <Box
       m="40px 0 0 0"
       height="36vh"
-      width="1200px"
+      width="1000px"
       
       sx={{
         "& .MuiDataGrid-root": {
