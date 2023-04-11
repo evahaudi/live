@@ -9,10 +9,21 @@ import { v4 as uuidv4 } from 'uuid';
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
 
+
+
+
+
+
+
+
+const PAGE_SIZE = 10;
+
 const Employee = () => {
   const [customer, setCustomer] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [data, setData] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   
   
   const [selectionModel, setSelectionModel] = useState([]);
@@ -330,29 +341,57 @@ const Employee = () => {
 
   
   useEffect(() => {
-    fetch('http://10.153.1.85:8000/fraud_app/api/v1/FalseImports/')
-      .then(response => response.json())
-      .then(data => {
+
+    
+    async function fetchData() {
+      try {
+        const response = await fetch(`http://10.153.1.85:8000/fraud_app/api/v1/FalseImports/?page=${page}&page_size=${PAGE_SIZE}`);
+        const data = await response.json();
+
         const results = data.results.map(item => ({
           id: uuidv4(),
           pin_no: item.pin_no,
-          suppliers_name:item.suppliers_name,
+          suppliers_name: item.suppliers_name,
           trp_from_dt: item.trp_from_dt,
           trp_to_dt: item.trp_to_dt,
-          invoice_no:item.invoice_no,
-          invoice_date:item.invoice_date,
-          lookup_code:item.lookup_code,
+          invoice_no: item.invoice_no,
+          invoice_date: item.invoice_date,
+          lookup_code: item.lookup_code,
           station_name: item.station_name,
-          cust_entry_no_prn:item.cust_entry_no_prn,
-          amnt_before_tax:item.amnt_before_tax,
-          type_of_purchases:item.type_of_purchases
-          
+          cust_entry_no_prn: item.cust_entry_no_prn,
+          amnt_before_tax: item.amnt_before_tax,
+          type_of_purchases: item.type_of_purchases
         }));
-        setCustomer(results);
-      })
-      .catch(error => console.error(error));
-  }, []);
+
+        setCustomer(prevCustomer => {
+          if (prevCustomer.length === 0) {
+            return results;
+          } else {
+            return [...prevCustomer, ...results];
+          }
+        });
+      
+        setTotalPages(Math.ceil(data.count / PAGE_SIZE));
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    fetchData();
+  }, [page]);
+
+  function handlePageChange(newPage) {
+    if (!isNaN(newPage)) {
+      setPage(parseInt(newPage));
+    }
+  }
   
+  
+  
+  
+
+
+
   console.log(customer);
   
 
@@ -481,8 +520,13 @@ const Employee = () => {
     setSelectionModel(newSelectionModel);
   }} 
   
-  pageSize={20}
-  rowsPerPageOptions={[20]}
+  pagination
+  pageSize={PAGE_SIZE} 
+  rowCount={totalPages ? totalPages * PAGE_SIZE : 0}
+  
+  onPageChange={handlePageChange}
+  
+  // onPageChange={(params) => handlePageChange(params.page)} 
 />
 </Box>  
     <Box textAlign="center"  >
