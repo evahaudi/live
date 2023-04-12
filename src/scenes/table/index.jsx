@@ -24,6 +24,9 @@ const Employee = () => {
   const [data, setData] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalRows, setTotalRows] = useState(0);
+
 
 
   const [selectionModel, setSelectionModel] = useState([]);
@@ -84,11 +87,28 @@ const Employee = () => {
   //       row.taxpayerName.toLowerCase().includes(searchQuery.toLowerCase())
   //   );
   // };
-
-
   const handleInputChange = (event) => {
     setSearchQuery(event.target.value);
   };
+
+
+  function handlePrevClick() {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  }
+  console.log(handlePrevClick);
+  function handleNextClick() {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage +1);
+    }
+  }
+  console.log(handleNextClick);
+  
+  console.log(setCurrentPage);
+
+  const startIndex = (currentPage - 1) * 10;
+  const endIndex = Math.min(startIndex + 9, totalRows - 1);
 
   const handleButtonClick = () => {
     let selectedPins = [];
@@ -107,7 +127,8 @@ const Employee = () => {
       return;
     }
 
-    const pageParam = `page=${page}`;
+
+    const pageParam = `page=${currentPage}`;
     const pinParams = selectedPins.map(pin => `pin_no=${pin}`).join('&');
     const url = `http://10.153.1.85:8000/fraud_app/api/v1/Directors/?${pageParam}&${pinParams}`;
     console.log(url);
@@ -120,16 +141,20 @@ const Employee = () => {
           throw new Error('Response not OK');
         }
       })
-      .then(data=> {
+      .then(data => {
         const results = data.results;
         setData(results);
-        setTotalPages(Math.ceil(data.count / results.length));
-        // const count = data.count;
+        const totalPages = Math.ceil(data.count / 10); // calculate total pages based on count
+        setTotalPages(totalPages);
+        setTotalRows(data.count); // set totalRows to the count property of data
+        setCurrentPage(Math.min(currentPage, totalPages)); // make sure current page is within bounds
         console.log(results)
         if (results.length > 0) {
           Swal.fire({
             title: 'Directors details',
             html: `
+
+           
         <table style="font-family: arial, sans-serif; border-collapse: collapse; width: 900px; ">
 
         <thead>
@@ -141,8 +166,9 @@ const Employee = () => {
           </tr>
         </thead>
         <tbody>
-          ${results.map(item => `
-            <tr key={ id: uuidv4()}>
+
+          ${results.map((item, index) => `
+            <tr key=${startIndex + endIndex + index}>
             <tr style="background-color: ${item.isOdd ? '#f2f2f2' : 'transparent'};">
               <td style="border: 1px solid #dddddd; text-align: left; padding: 8px;">${item.pin_no}</td>
               <td style="border: 1px solid #dddddd; text-align: left; padding: 8px;">${item.tax_payer_name}</td>
@@ -152,6 +178,12 @@ const Employee = () => {
           `).join('')}
         </tbody>
       </table>
+      <div id="pagination">
+      <button onClick=${handlePrevClick} disabled=${currentPage === 1}>Prev</button>
+      <button onClick=${handleNextClick} disabled=${currentPage === totalPages}>Next</button>
+      <span>Page ${currentPage} of ${totalPages}</span>
+      <span>Total Rows: ${totalRows}</span>
+    </div>
       
         `,
             showCloseButton: true,
@@ -181,7 +213,7 @@ const Employee = () => {
 
 
 
-  };
+    };
 
 
 
@@ -193,18 +225,20 @@ const Employee = () => {
 
 
     fetch(url)
-    .then(response => {
-      if (response.ok) {
-        return response.json();
-      } else {
-        throw new Error('Response not OK');
-      }
-    })
-    .then(data=> {
-      const results = data.results;
-      // const count = data.count;
-      console.log(results)
-      if (results.length > 0) {
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        } else {
+          throw new Error('Response not OK');
+        }
+      })
+      .then(data => {
+        const results = data.results;
+        // const count = data.count;
+        console.log(results)
+
+
+        if (results.length > 0) {
 
           Swal.fire({
             title: 'Directors details',
