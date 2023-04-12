@@ -9,10 +9,15 @@ import { v4 as uuidv4 } from 'uuid';
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
 
+
+const PAGE_SIZE = 10;
+
 const Customer = () => {
   const [tax, setTax] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [data, setData] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   
   
   const [selectionModel, setSelectionModel] = useState([]);
@@ -323,24 +328,65 @@ const Customer = () => {
 
 
   
+  // useEffect(() => {
+  //   fetch('http://10.153.1.85:8000/fraud_app/api/v1/Directors/')
+  //     .then(response => response.json())
+  //     .then(data => {
+  //       const results = data.results.map(item => ({
+  //         id: uuidv4(),
+  //         pin_no: item.pin_no,
+  //         tax_payer_name:item.tax_payer_name,
+  //         associated_entity_pin:item.associated_entity_pin,
+  //         associated_entity_type:item.associated_entity_type
+  //         }));
+  //       setTax(results);
+  //     })
+  //     .catch(error => console.error(error));
+  // }, []);
+  
+  // console.log(tax);
+
+
   useEffect(() => {
-    fetch('http://10.153.1.85:8000/fraud_app/api/v1/Directors/')
-      .then(response => response.json())
-      .then(data => {
+
+
+    async function fetchData() {
+      try {
+        const response = await fetch(`http://10.153.1.85:8000/fraud_app/api/v1/Directors/?page=${page}&page_size=${PAGE_SIZE}`);
+        const data = await response.json();
+
         const results = data.results.map(item => ({
           id: uuidv4(),
-          pin_no: item.pin_no,
-          tax_payer_name:item.tax_payer_name,
-          associated_entity_pin:item.associated_entity_pin,
-          associated_entity_type:item.associated_entity_type
-          }));
-        setTax(results);
-      })
-      .catch(error => console.error(error));
-  }, []);
-  
+                  pin_no: item.pin_no,
+                  tax_payer_name:item.tax_payer_name,
+                  associated_entity_pin:item.associated_entity_pin,
+                  associated_entity_type:item.associated_entity_type
+        }));
+
+        setTax(prevCustomer => {
+          if (prevCustomer.length === 0) {
+            return results;
+          } else {
+            return [...prevCustomer, ...results];
+          }
+        });
+
+        setTotalPages(Math.ceil(data.count / PAGE_SIZE));
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    fetchData();
+  }, [page]);
+
+  function handlePageChange(newPage) {
+    if (!isNaN(newPage)) {
+      setPage(parseInt(newPage));
+    }
+  }
+
   console.log(tax);
-  
 
 
 
@@ -468,8 +514,11 @@ const Customer = () => {
     setSelectionModel(newSelectionModel);
   }} 
   
-  pageSize={20}
-  rowsPerPageOptions={[20]}
+  pagination
+  pageSize={PAGE_SIZE}
+  rowCount={totalPages ? totalPages * PAGE_SIZE : 0}
+
+  onPageChange={handlePageChange}
 />
 </Box>  
     <Box textAlign="center"  >

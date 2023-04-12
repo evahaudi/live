@@ -177,6 +177,7 @@ const Graph = () => {
     Toolbar: GridToolbar,
   }}
   
+  
 />
 
 </Box>  
