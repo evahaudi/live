@@ -11,11 +11,6 @@ import Header from "../../components/Header";
 
 
 
-
-
-
-
-
 const PAGE_SIZE = 10;
 
 const Employee = () => {
@@ -92,24 +87,8 @@ const Employee = () => {
   };
 
 
-  function handlePrevClick() {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  }
-  console.log(handlePrevClick);
-  function handleNextClick() {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage +1);
-    }
-  }
-  console.log(handleNextClick);
-  
-  console.log(setCurrentPage);
-
-  const startIndex = (currentPage - 1) * 10;
-  const endIndex = Math.min(startIndex + 9, totalRows - 1);
-
+  const ROWS_PER_PAGE = 10;
+  console.log(ROWS_PER_PAGE);
   const handleButtonClick = () => {
     let selectedPins = [];
 
@@ -127,12 +106,14 @@ const Employee = () => {
       return;
     }
 
-
     const pageParam = `page=${currentPage}`;
     const pinParams = selectedPins.map(pin => `pin_no=${pin}`).join('&');
     const url = `http://10.153.1.85:8000/fraud_app/api/v1/Directors/?${pageParam}&${pinParams}`;
     console.log(url);
 
+
+
+    
     fetch(url)
       .then(response => {
         if (response.ok) {
@@ -143,13 +124,80 @@ const Employee = () => {
       })
       .then(data => {
         const results = data.results;
-        setData(results);
-        const totalPages = Math.ceil(data.count / 10); // calculate total pages based on count
+        setData(prevData => {
+          if (prevData.length === 0) {
+            return results;
+          } else {
+            return [...prevData, ...results];
+          }
+        });
+        const totalPages = Math.ceil(data.count / ROWS_PER_PAGE); // calculate total pages based on count and rows per page
         setTotalPages(totalPages);
         setTotalRows(data.count); // set totalRows to the count property of data
         setCurrentPage(Math.min(currentPage, totalPages)); // make sure current page is within bounds
         console.log(results)
+        console.log(totalPages);
+
+
+        // Calculate the start and end indices for the current page
+        const startIndex = (currentPage - 1) * ROWS_PER_PAGE;
+        const endIndex = Math.min(startIndex + ROWS_PER_PAGE - 1, totalRows - 1);
+        console.log(startIndex);
+        console.log(endIndex);
+
+        if (startIndex < 0) {
+          setCurrentPage(1); // reset to first page if start index is out of bounds
+          return;
+        }
+
+        // Ensure that the end index is within the bounds of the results array
+        if (endIndex >= results.length) {
+          setCurrentPage(totalPages); // reset to last page if end index is out of bounds
+          return;
+        }
+        console.log(results.slice(startIndex, endIndex + 1));
+       
+
+
+
         if (results.length > 0) {
+          const paginationButtons = [];
+          
+
+          const goToPreviousPage = currentPage > 1 ? () => setCurrentPage(currentPage - 1) : null;
+          const goToNextPage = currentPage < totalPages ? () => setCurrentPage(currentPage + 1) : null;
+          const goToLastPage = currentPage < totalPages ? () => setCurrentPage(totalPages) : null;
+          console.log(setCurrentPage);
+
+
+          // Add "Previous" button
+          if (goToPreviousPage) {
+            paginationButtons.push(`
+              <button type="button" style="margin-right: 10px;" onClick="${goToPreviousPage}">
+                Prev
+              </button>
+            `);
+          }
+
+          // Add "Next" button
+          if (goToNextPage) {
+            paginationButtons.push(`
+              <button type="button" style="margin-right: 10px;" onclick="${goToNextPage}">
+                Next
+              </button>
+            `);
+          }
+        
+
+          // Add "End" button
+          if (goToLastPage) { 
+            paginationButtons.push(`
+              <button type="button" style="margin-right: 10px;" onclick="${goToLastPage}">
+                End
+              </button>
+            `);
+          }
+          
           Swal.fire({
             title: 'Directors details',
             html: `
@@ -166,9 +214,10 @@ const Employee = () => {
           </tr>
         </thead>
         <tbody>
+        ${results.slice(startIndex, endIndex + 1).map((item, index) => `
+        
+          <tr key=${index} style={{ backgroundColor: item.isOdd ? "#f2f2f2" : "transparent" }}>
 
-          ${results.map((item, index) => `
-            <tr key=${startIndex + endIndex + index}>
             <tr style="background-color: ${item.isOdd ? '#f2f2f2' : 'transparent'};">
               <td style="border: 1px solid #dddddd; text-align: left; padding: 8px;">${item.pin_no}</td>
               <td style="border: 1px solid #dddddd; text-align: left; padding: 8px;">${item.tax_payer_name}</td>
@@ -178,13 +227,9 @@ const Employee = () => {
           `).join('')}
         </tbody>
       </table>
-      <div id="pagination">
-      <button onClick=${handlePrevClick} disabled=${currentPage === 1}>Prev</button>
-      <button onClick=${handleNextClick} disabled=${currentPage === totalPages}>Next</button>
-      <span>Page ${currentPage} of ${totalPages}</span>
-      <span>Total Rows: ${totalRows}</span>
+      <div style="margin-top: 20px;">
+      ${paginationButtons.join('')}
     </div>
-      
         `,
             showCloseButton: true,
             showConfirmButton: false,
@@ -210,12 +255,9 @@ const Employee = () => {
       .catch(error => {
         console.error('Network error:', error);
       });
+  };
 
-
-
-    };
-
-
+  
 
   const handleView = (pin_no) => {
 
