@@ -10,7 +10,6 @@ import { tokens } from "../../theme";
 import Header from "../../components/Header";
 
 
-
 const PAGE_SIZE = 10;
 
 const Employee = () => {
@@ -21,21 +20,16 @@ const Employee = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalRows, setTotalRows] = useState(0);
-
-
-
   const [selectionModel, setSelectionModel] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
 
-
   const handleClick = (event, id) => {
     setAnchorEl(event.currentTarget);
     setSelectionModel(id);
   };
-
   const handleClose = () => {
     setAnchorEl(null);
   };
@@ -86,43 +80,36 @@ const Employee = () => {
     setSearchQuery(event.target.value);
   };
 
-
   const ROWS_PER_PAGE = 10;
   console.log(ROWS_PER_PAGE);
-  const handleButtonClick = () => {
-    let selectedPins = [];
 
-    if (selectionModel.length === 1) {
-      const selectedRow = customer.find((row) => row.id === selectionModel[0]);
-      selectedPins.push(selectedRow?.pin_no);
-    } else if (selectionModel.length > 1) {
-      selectedPins = selectionModel.map((id) => customer.find((row) => row.id === id)?.pin_no);
-    } else {
-      Swal.fire({
-        icon: 'warning',
-        text: 'Please select at least one row',
-        confirmButtonColor: colors.redAccent[500],
-      });
-      return;
-    }
+  useEffect(() => {
+    const fetchData = async (page) => {
+      let selectedPins = [];
 
-    const pageParam = `page=${currentPage}`;
-    const pinParams = selectedPins.map(pin => `pin_no=${pin}`).join('&');
-    const url = `http://10.153.1.85:8000/fraud_app/api/v1/Directors/?${pageParam}&${pinParams}`;
-    console.log(url);
+      if (!selectionModel || selectionModel.length === 0) {
+        Swal.fire({
+          icon: 'warning',
+          text: 'Please select at least one row',
+        });
+        return;
+      }
 
+      const selectedRows = customer.filter((row) => selectionModel.includes(row.id));
+      selectedPins = selectedRows.map((row) => row?.pin_no);
 
+      if (!currentPage || !setData || !setTotalPages || !setTotalRows) {
+        console.error('One or more state setters are not defined');
+        return;
+      }
 
-    
-    fetch(url)
-      .then(response => {
-        if (response.ok) {
-          return response.json();
-        } else {
-          throw new Error('Response not OK');
-        }
-      })
-      .then(data => {
+      const pinParams = selectedPins.map(pin => `pin_no=${pin}`).join('&');
+      const url = `http://10.153.1.85:8000/fraud_app/api/v1/Directors/?$page=${page}&&limit=${ROWS_PER_PAGE}&${pinParams}`;
+      console.log(url);
+
+      try {
+        const response = await fetch(url);
+        const data = await response.json();
         const results = data.results;
         setData(prevData => {
           if (prevData.length === 0) {
@@ -131,133 +118,78 @@ const Employee = () => {
             return [...prevData, ...results];
           }
         });
-        const totalPages = Math.ceil(data.count / ROWS_PER_PAGE); // calculate total pages based on count and rows per page
+        const totalPages = Math.ceil(data.count / ROWS_PER_PAGE);
         setTotalPages(totalPages);
-        setTotalRows(data.count); // set totalRows to the count property of data
-        setCurrentPage(Math.min(currentPage, totalPages)); // make sure current page is within bounds
-        console.log(results)
-        console.log(totalPages);
-
-
-        // Calculate the start and end indices for the current page
-        const startIndex = (currentPage - 1) * ROWS_PER_PAGE;
-        const endIndex = Math.min(startIndex + ROWS_PER_PAGE - 1, totalRows - 1);
-        console.log(startIndex);
-        console.log(endIndex);
-
-        if (startIndex < 0) {
-          setCurrentPage(1); // reset to first page if start index is out of bounds
-          return;
-        }
-
-        // Ensure that the end index is within the bounds of the results array
-        if (endIndex >= results.length) {
-          setCurrentPage(totalPages); // reset to last page if end index is out of bounds
-          return;
-        }
-        console.log(results.slice(startIndex, endIndex + 1));
-       
-
-
-
-        if (results.length > 0) {
-          const paginationButtons = [];
-          
-
-          const goToPreviousPage = currentPage > 1 ? () => setCurrentPage(currentPage - 1) : null;
-          const goToNextPage = currentPage < totalPages ? () => setCurrentPage(currentPage + 1) : null;
-          const goToLastPage = currentPage < totalPages ? () => setCurrentPage(totalPages) : null;
-          console.log(setCurrentPage);
-
-
-          // Add "Previous" button
-          if (goToPreviousPage) {
-            paginationButtons.push(`
-              <button type="button" style="margin-right: 10px;" onClick="${goToPreviousPage}">
-                Prev
-              </button>
-            `);
-          }
-
-          // Add "Next" button
-          if (goToNextPage) {
-            paginationButtons.push(`
-              <button type="button" style="margin-right: 10px;" onclick="${goToNextPage}">
-                Next
-              </button>
-            `);
-          }
-        
-
-          // Add "End" button
-          if (goToLastPage) { 
-            paginationButtons.push(`
-              <button type="button" style="margin-right: 10px;" onclick="${goToLastPage}">
-                End
-              </button>
-            `);
-          }
-          
-          Swal.fire({
-            title: 'Directors details',
-            html: `
-
-           
-        <table style="font-family: arial, sans-serif; border-collapse: collapse; width: 900px; ">
-
-        <thead>
-          <tr style="background-color: #dddddd;">
-            <th style="border: 1px solid #dddddd; text-align: left; padding: 8px; ">Pin No</th>
-            <th style="border: 1px solid #dddddd; text-align: left; padding: 8px;">Name</th>
-            <th style="border: 1px solid #dddddd; text-align: left; padding: 8px;">Associated Pin</th>
-            <th style="border: 1px solid #dddddd; text-align: left; padding: 8px;">Associated Type</th>
-          </tr>
-        </thead>
-        <tbody>
-        ${results.slice(startIndex, endIndex + 1).map((item, index) => `
-        
-          <tr key=${index} style={{ backgroundColor: item.isOdd ? "#f2f2f2" : "transparent" }}>
-
-            <tr style="background-color: ${item.isOdd ? '#f2f2f2' : 'transparent'};">
-              <td style="border: 1px solid #dddddd; text-align: left; padding: 8px;">${item.pin_no}</td>
-              <td style="border: 1px solid #dddddd; text-align: left; padding: 8px;">${item.tax_payer_name}</td>
-              <td style="border: 1px solid #dddddd; text-align: left; padding: 8px;">${item.associated_entity_pin}</td>
-              <td style="border: 1px solid #dddddd; text-align: left; padding: 8px;">${item.associated_entity_type}</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-      <div style="margin-top: 20px;">
-      ${paginationButtons.join('')}
-    </div>
-        `,
-            showCloseButton: true,
-            showConfirmButton: false,
-            width: '1000px', // set the width of the Swal modal
-            height: '500px', // set the height of the Swal modal
-          });
-        } else {
-          Swal.fire({
-            icon: 'warning',
-            text: 'No associated data found',
-            confirmButtonColor: colors.redAccent[500],
-          });
-        }
-      })
-      .catch(error => {
-        console.error('Fetch error:', error);
+      } catch (error) {
+        console.log(error);
         Swal.fire({
-          icon: 'warning',
-          text: 'No associated data found',
-          confirmButtonColor: colors.redAccent[500],
+          icon: 'error',
+          text: error.message,
         });
-      })
-      .catch(error => {
-        console.error('Network error:', error);
-      });
+      };
+
+    };
+
+    fetchData(currentPage,selectionModel);
+  }, [currentPage,selectionModel]);
+
+  const handlePageClick = (page) => {
+    setCurrentPage(page);
   };
 
+  const handleButtonClick = () => {
+
+    if (!selectionModel || selectionModel.length === 0) {
+    Swal.fire({
+      icon: 'warning',
+      text: 'Please select at least one row',
+      confirmButtonColor: colors.redAccent[500],
+    });
+    return;
+  }
+
+  if (!customer) {
+    console.error('Customer data is not defined');
+    return;
+  }
+
   
+    const start = (currentPage - 1) * ROWS_PER_PAGE;
+    const end = start + ROWS_PER_PAGE;
+    const currentData = data.slice(start, end);
+    console.log(currentData);
+    
+    let table = `<table style="font-family: arial, sans-serif; border-collapse: collapse; width: 900px; "><thead style="border: 1px solid #dddddd; text-align: left; padding: 8px; "><tr style="background-color: #dddddd;"><th>pinNo</th><th>associated entity pin</th><th>associated entity type</th></tr></thead><tbody>`;
+    currentData.forEach((item) => {
+      table += `<tr><td style="border: 1px solid #dddddd; text-align: left; padding: 8px;">${item.pin_no}</td><td style="border: 1px solid #dddddd; text-align: left; padding: 8px;">${item.associated_entity_pin}</td><td style="border: 1px solid #dddddd; text-align: left; padding: 8px;">${item.associated_entity_type}</td></tr>`;
+    });
+    table += "</tbody></table>";
+
+    const paginationButtons = [];
+    for (let i = 1; i <= totalPages; i++) {
+      paginationButtons.push(
+        `<button class="pagination-button ${currentPage === i ? "active" : ""}" data-page="${i}">${i}</button>`
+      );
+    }
+
+    Swal.fire({
+      title: 'directors details',
+      html: `${table}<div class="pagination-buttons">${paginationButtons.join("")}</div>`,
+      showCloseButton: true,
+      showConfirmButton: false,
+      width: '1000px', // set the width of the Swal modal
+      height: '500px', // set the height of the Swal modal
+    });
+
+    const paginationButtonElements = document.querySelectorAll(".pagination-button");
+    paginationButtonElements.forEach((button) => {
+      button.addEventListener("click", () => {
+        const page = button.dataset.page;
+        handlePageClick(parseInt(page));
+      });
+    });
+  };
+
 
   const handleView = (pin_no) => {
 
@@ -297,7 +229,8 @@ const Employee = () => {
         </thead>
         <tbody>
           ${results.map(item => `
-            <tr style="background-color: ${item.isOdd ? '#f2f2f2' : 'transparent'};">
+           <tr uuidv4()/>
+            <tr key=${uuidv4()} >
               <td style="border: 1px solid #dddddd; text-align: left; padding: 8px;">${item.pin_no}</td>
               <td style="border: 1px solid #dddddd; text-align: left; padding: 8px;">${item.tax_payer_name}</td>
               <td style="border: 1px solid #dddddd; text-align: left; padding: 8px;">${item.associated_entity_pin}</td>
@@ -583,19 +516,7 @@ const Employee = () => {
     }
   }
 
-
-
-
-
-
-
   console.log(customer);
-
-
-
-
-
-
 
   return (
     <Box m="20px">
