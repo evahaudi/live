@@ -3,13 +3,13 @@ import Swal from 'sweetalert2';
 import { useState, useEffect } from 'react';
 import SearchIcon from "@mui/icons-material/Search";
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import ReactDOM from 'react-dom';
+
 import InputBase from "@mui/material/InputBase";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { v4 as uuidv4 } from 'uuid';
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
-import ReactDOM from 'react-dom';
-
 
 
 const PAGE_SIZE = 10;
@@ -116,13 +116,11 @@ const Employee = () => {
           associated_entity_type: item.associated_entity_type
         }));
 
-        setTableData(prevCustomer => {
-          if (prevCustomer.length === 0) {
-            return results;
-          } else {
-            return [...prevCustomer, ...results];
-          }
-        });
+        if (page === 1) {
+          setTableData(results);
+        } else {
+          setTableData(prevTableData => [...prevTableData, ...results]);
+        }
 
         setTotalPages(Math.ceil(data.count / ROWS_PER_PAGE));
       } catch (error) {
@@ -131,15 +129,18 @@ const Employee = () => {
     }
 
     fetchData();
-  }, [page ,selectionModel, customer]);
+  }, [page, selectionModel, customer]);
   console.log(tableData);
 
-  function handlePage(newPage) {
+  function handlePageChange(newPage) {
     if (!isNaN(newPage)) {
-      setPage(parseInt(newPage));
+      setPage(newPage > 1 ? 1 : newPage +1);
     }
+  
   }
-
+  // const handlePage = (page) => {
+  //   setCurrentPage(page);
+  // };
 
   const handleButtonClick = () => {
     if (!selectionModel || selectionModel.length === 0) {
@@ -156,8 +157,7 @@ const Employee = () => {
       return;
     }
 
-    const start = (page - 1) * ROWS_PER_PAGE;
-    const end = start + ROWS_PER_PAGE;
+
     const columns = [
       { field: 'pin_no', headerName: 'PIN', width: 180 },
       { field: 'tax_payer_name', headerName: 'Name', width: 300 },
@@ -176,14 +176,14 @@ const Employee = () => {
       didOpen: () => {
         ReactDOM.render(
           <div style={{ height: 700, width: '100%' }}>
-            <DataGrid 
-              rows={tableData.slice(start, end)} 
+            <DataGrid
+              rows={tableData}
               columns={columns}
               rowKey="id"
               pagination
               pageSize={ROWS_PER_PAGE}
               rowCount={totalPages ? totalPages * ROWS_PER_PAGE : 0}
-              onPageChange={handlePage}
+              onPageChange={handlePageChange}
             />
           </div>,
           document.getElementById('datagrid')
@@ -191,8 +191,6 @@ const Employee = () => {
       }
     });
   };
-
-
 
   const handleView = (pin_no) => {
 
@@ -496,11 +494,11 @@ const Employee = () => {
           type_of_purchases: item.type_of_purchases
         }));
 
-        setCustomer(prevTableData => {
-          if (prevTableData.length === 0) {
+        setCustomer(prevCustomer => {
+          if (prevCustomer.length === 0) {
             return results;
           } else {
-            return [...prevTableData, ...results];
+            return [...prevCustomer, ...results];
           }
         });
 
@@ -513,11 +511,7 @@ const Employee = () => {
     fetchData();
   }, [page]);
 
-  function handlePageChange(newPage) {
-    if (!isNaN(newPage)) {
-      setPage(parseInt(newPage));
-    }
-  }
+
 
   console.log(customer);
 
