@@ -8,6 +8,8 @@ import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { v4 as uuidv4 } from 'uuid';
 import { tokens } from "../../theme";
 import Header from "../../components/Header";
+import ReactDOM from 'react-dom';
+
 
 
 const PAGE_SIZE = 10;
@@ -18,10 +20,7 @@ const Employee = () => {
   const [data, setData] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalRows, setTotalRows] = useState(0);
   const [tableData, setTableData] = useState([]);
-
   const [selectionModel, setSelectionModel] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -86,41 +85,61 @@ const Employee = () => {
   console.log(ROWS_PER_PAGE);
 
   useEffect(() => {
-    const fetchData = async (page) => {
-      if (!selectionModel || selectionModel.length === 0) {
+    const fetchData = async () => {
+      let selectedPins = [];
+      const selectedRows = customer.filter((row) =>
+        selectionModel.includes(row.id)
+      );
+      selectedPins = selectedRows.map((row) => row?.pin_no);
+
+      if (
+        !setData ||
+        !setTotalPages ||
+        !setTableData
+      ) {
+        console.error("One or more state setters are not defined");
         return;
       }
-  
-      const selectedRows = customer.filter((row) => selectionModel.includes(row.id));
-      const selectedPins = selectedRows.map((row) => row?.pin_no);
-  
-      const pinParams = selectedPins.map(pin => `pin_no=${pin}`).join('&');
+
+      const pinParams = selectedPins.map((pin) => `pin_no=${pin}`).join("&");
       const url = `http://10.153.1.85:8000/fraud_app/api/v1/Directors/?page=${page}&limit=${ROWS_PER_PAGE}&${pinParams}`;
-  
+      console.log(url);
+
       try {
         const response = await fetch(url);
         const data = await response.json();
-        const results = data.results;
-        setTableData(prevData => [...prevData, ...results]);
-      } catch (error) {
-        console.log(error);
-        Swal.fire({
-          icon: 'error',
-          text: error.message,
-        });
-      };
-    };
-  
-    setTableData([]);
-    for (let i = 1; i <= totalPages; i++) {
-     fetchData(i);
-    }
-  }, [selectionModel]);
-  
+        const results = data.results.map(item => ({
+          id: uuidv4(),
+          pin_no: item.pin_no,
+          tax_payer_name: item.tax_payer_name,
+          associated_entity_pin: item.associated_entity_pin,
+          associated_entity_type: item.associated_entity_type
+        }));
 
-  const handlePageClick = (page) => {
-    setCurrentPage(page);
-  };
+        setTableData(prevCustomer => {
+          if (prevCustomer.length === 0) {
+            return results;
+          } else {
+            return [...prevCustomer, ...results];
+          }
+        });
+
+        setTotalPages(Math.ceil(data.count / ROWS_PER_PAGE));
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    fetchData();
+  }, [page ,selectionModel, customer]);
+  console.log(tableData);
+
+  function handlePage(newPage) {
+    if (!isNaN(newPage)) {
+      setPage(parseInt(newPage));
+    }
+  }
+
 
   const handleButtonClick = () => {
     if (!selectionModel || selectionModel.length === 0) {
@@ -131,57 +150,48 @@ const Employee = () => {
       });
       return;
     }
-  
+
     if (!customer || !totalPages || !data) {
       console.error('Customer data or total pages or fetched data is not defined');
       return;
     }
-  
-    const start = (currentPage - 1) * ROWS_PER_PAGE;
-  const end = start + ROWS_PER_PAGE;
-  const newData = tableData.slice(start, end);
-  
-    let table = `<table style="font-family: arial, sans-serif; border-collapse: collapse; width: 900px; "><thead style="border: 1px solid #dddddd; text-align: left; padding: 8px; "><tr style="background-color: #dddddd;"><th>pinNo</th><th>associated entity pin</th><th>associated entity type</th></tr></thead><tbody>`;
-    newData.forEach((item) => {
-      table += `<tr><td style="border: 1px solid #dddddd; text-align: left; padding: 8px;">${item.pin_no}</td><td style="border: 1px solid #dddddd; text-align: left; padding: 8px;">${item.associated_entity_pin}</td><td style="border: 1px solid #dddddd; text-align: left; padding: 8px;">${item.associated_entity_type}</td></tr>`;
-    });
-    table += "</tbody></table>";
-  
-    const paginationButtons = () => {
-      const buttons = [];
-      for (let i = 1; i <= totalPages; i++) {
-        buttons.push(
-          <Button
-            key={i}
-            onClick={() => handlePageClick(i)}
-            variant={i === currentPage ? "contained" : "outlined"}
-          >
-            {i}
-          </Button>
-        );
-      }
-      return <Box sx={{ "& > *": { marginTop: 2 } }}>{buttons}</Box>;
-    };
-    
-  
+
+    const start = (page - 1) * ROWS_PER_PAGE;
+    const end = start + ROWS_PER_PAGE;
+    const columns = [
+      { field: 'pin_no', headerName: 'PIN', width: 180 },
+      { field: 'tax_payer_name', headerName: 'Name', width: 300 },
+      { field: 'associated_entity_pin', headerName: 'ASSOCIATED PIN NO', width: 220 },
+      { field: 'associated_entity_type', headerName: 'ASSOCIATED PIN TYPE', width: 220 },
+    ];
+
     Swal.fire({
-      title: 'directors details',
-      html: `${table}<div class="pagination-buttons">${paginationButtons.join("")}</div>`,
+      title: 'Directors Details',
       showCloseButton: true,
       showConfirmButton: false,
+      showcloseButtonColor: colors.redAccent[500],
       width: '1000px', // set the width of the Swal modal
       height: '500px', // set the height of the Swal modal
-    });
-  
-    const paginationButtonElements = document.querySelectorAll(".pagination-button");
-    paginationButtonElements.forEach((button) => {
-      button.addEventListener("click", () => {
-        const page = button.dataset.page;
-        handlePageClick(parseInt(page));
-      });
+      html: '<div id="datagrid"></div>',
+      didOpen: () => {
+        ReactDOM.render(
+          <div style={{ height: 700, width: '100%' }}>
+            <DataGrid 
+              rows={tableData.slice(start, end)} 
+              columns={columns}
+              rowKey="id"
+              pagination
+              pageSize={ROWS_PER_PAGE}
+              rowCount={totalPages ? totalPages * ROWS_PER_PAGE : 0}
+              onPageChange={handlePage}
+            />
+          </div>,
+          document.getElementById('datagrid')
+        );
+      }
     });
   };
-  
+
 
 
   const handleView = (pin_no) => {
@@ -486,11 +496,11 @@ const Employee = () => {
           type_of_purchases: item.type_of_purchases
         }));
 
-        setCustomer(prevCustomer => {
-          if (prevCustomer.length === 0) {
+        setCustomer(prevTableData => {
+          if (prevTableData.length === 0) {
             return results;
           } else {
-            return [...prevCustomer, ...results];
+            return [...prevTableData, ...results];
           }
         });
 
