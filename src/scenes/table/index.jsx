@@ -20,6 +20,8 @@ const Employee = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalRows, setTotalRows] = useState(0);
+  const [tableData, setTableData] = useState([]);
+
   const [selectionModel, setSelectionModel] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -85,41 +87,21 @@ const Employee = () => {
 
   useEffect(() => {
     const fetchData = async (page) => {
-      let selectedPins = [];
-
       if (!selectionModel || selectionModel.length === 0) {
-        Swal.fire({
-          icon: 'warning',
-          text: 'Please select at least one row',
-        });
         return;
       }
-
+  
       const selectedRows = customer.filter((row) => selectionModel.includes(row.id));
-      selectedPins = selectedRows.map((row) => row?.pin_no);
-
-      if (!currentPage || !setData || !setTotalPages || !setTotalRows) {
-        console.error('One or more state setters are not defined');
-        return;
-      }
-
+      const selectedPins = selectedRows.map((row) => row?.pin_no);
+  
       const pinParams = selectedPins.map(pin => `pin_no=${pin}`).join('&');
-      const url = `http://10.153.1.85:8000/fraud_app/api/v1/Directors/?$page=${page}&&limit=${ROWS_PER_PAGE}&${pinParams}`;
-      console.log(url);
-
+      const url = `http://10.153.1.85:8000/fraud_app/api/v1/Directors/?page=${page}&limit=${ROWS_PER_PAGE}&${pinParams}`;
+  
       try {
         const response = await fetch(url);
         const data = await response.json();
         const results = data.results;
-        setData(prevData => {
-          if (prevData.length === 0) {
-            return results;
-          } else {
-            return [...prevData, ...results];
-          }
-        });
-        const totalPages = Math.ceil(data.count / ROWS_PER_PAGE);
-        setTotalPages(totalPages);
+        setTableData(prevData => [...prevData, ...results]);
       } catch (error) {
         console.log(error);
         Swal.fire({
@@ -127,51 +109,61 @@ const Employee = () => {
           text: error.message,
         });
       };
-
     };
-
-    fetchData(currentPage,selectionModel);
-  }, [currentPage,selectionModel]);
+  
+    setTableData([]);
+    for (let i = 1; i <= totalPages; i++) {
+     fetchData(i);
+    }
+  }, [selectionModel]);
+  
 
   const handlePageClick = (page) => {
     setCurrentPage(page);
   };
 
   const handleButtonClick = () => {
-
     if (!selectionModel || selectionModel.length === 0) {
-    Swal.fire({
-      icon: 'warning',
-      text: 'Please select at least one row',
-      confirmButtonColor: colors.redAccent[500],
-    });
-    return;
-  }
-
-  if (!customer) {
-    console.error('Customer data is not defined');
-    return;
-  }
-
+      Swal.fire({
+        icon: 'warning',
+        text: 'Please select at least one row',
+        confirmButtonColor: colors.redAccent[500],
+      });
+      return;
+    }
+  
+    if (!customer || !totalPages || !data) {
+      console.error('Customer data or total pages or fetched data is not defined');
+      return;
+    }
   
     const start = (currentPage - 1) * ROWS_PER_PAGE;
-    const end = start + ROWS_PER_PAGE;
-    const currentData = data.slice(start, end);
-    console.log(currentData);
-    
+  const end = start + ROWS_PER_PAGE;
+  const newData = tableData.slice(start, end);
+  
     let table = `<table style="font-family: arial, sans-serif; border-collapse: collapse; width: 900px; "><thead style="border: 1px solid #dddddd; text-align: left; padding: 8px; "><tr style="background-color: #dddddd;"><th>pinNo</th><th>associated entity pin</th><th>associated entity type</th></tr></thead><tbody>`;
-    currentData.forEach((item) => {
+    newData.forEach((item) => {
       table += `<tr><td style="border: 1px solid #dddddd; text-align: left; padding: 8px;">${item.pin_no}</td><td style="border: 1px solid #dddddd; text-align: left; padding: 8px;">${item.associated_entity_pin}</td><td style="border: 1px solid #dddddd; text-align: left; padding: 8px;">${item.associated_entity_type}</td></tr>`;
     });
     table += "</tbody></table>";
-
-    const paginationButtons = [];
-    for (let i = 1; i <= totalPages; i++) {
-      paginationButtons.push(
-        `<button class="pagination-button ${currentPage === i ? "active" : ""}" data-page="${i}">${i}</button>`
-      );
-    }
-
+  
+    const paginationButtons = () => {
+      const buttons = [];
+      for (let i = 1; i <= totalPages; i++) {
+        buttons.push(
+          <Button
+            key={i}
+            onClick={() => handlePageClick(i)}
+            variant={i === currentPage ? "contained" : "outlined"}
+          >
+            {i}
+          </Button>
+        );
+      }
+      return <Box sx={{ "& > *": { marginTop: 2 } }}>{buttons}</Box>;
+    };
+    
+  
     Swal.fire({
       title: 'directors details',
       html: `${table}<div class="pagination-buttons">${paginationButtons.join("")}</div>`,
@@ -180,7 +172,7 @@ const Employee = () => {
       width: '1000px', // set the width of the Swal modal
       height: '500px', // set the height of the Swal modal
     });
-
+  
     const paginationButtonElements = document.querySelectorAll(".pagination-button");
     paginationButtonElements.forEach((button) => {
       button.addEventListener("click", () => {
@@ -189,6 +181,7 @@ const Employee = () => {
       });
     });
   };
+  
 
 
   const handleView = (pin_no) => {
